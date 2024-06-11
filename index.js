@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 
 const app = express();
-const PORT = process.env.PORT || 3306;
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -44,12 +44,14 @@ app.post('/ussd', (req, res) => {
         response = `CON Welcome to Guild voting booth\n`;
         response += `1. English\n`;
         response += `2. French`;
+        res.send(response);
     } else if (userInput.length === 1 && userInput[0] !== '') {
         // Save user's language choice and move to the name input menu
         userLanguages[phoneNumber] = userInput[0] === '1' ? 'en' : 'fr';
         response = userLanguages[phoneNumber] === 'en' ? 
             `CON Please enter your name:` : 
             `CON TS'il vous plaît entrez votre nom:`;
+        res.send(response);
     } else if (userInput.length === 2) {
         // Save user's name
         userNames[phoneNumber] = userInput[1];
@@ -58,6 +60,7 @@ app.post('/ussd', (req, res) => {
         response = userLanguages[phoneNumber] === 'en' ? 
             `CON Hi ${userNames[phoneNumber]}, choose an option:\n1. Vote Candidate\n2. View Votes` : 
             `CON Salut ${userNames[phoneNumber]}, choisis une option:\n1. Voter candidat\n2. Afficher les votes`;
+        res.send(response);
     } else if (userInput.length === 3) {
         if (userInput[2] === '1') {
             // Check if the phone number has already voted
@@ -65,11 +68,13 @@ app.post('/ussd', (req, res) => {
                 response = userLanguages[phoneNumber] === 'en' ? 
                     `END You have already voted. Thank you!` : 
                     `END Vous avez déjà voté. Merci!`;
+                res.send(response);
             } else {
                 // Voting option selected
                 response = userLanguages[phoneNumber] === 'en' ? 
                     `CON Select a candidate:\n1. Fabrice BYIRINGIRO\n2. Fabien\n3. Benitha\n4. Johnathan\n5. Moise` : 
                     `CON Sélectionnez un candidat:\n1. Fabrice BYIRINGIRO\n2. Fabien \n3. Benitha\n4. Johnathan\n5. Moise`;
+                res.send(response);
             }
         } else if (userInput[2] === '2') {
             // View votes option selected
@@ -81,11 +86,10 @@ app.post('/ussd', (req, res) => {
                     console.error('Error fetching votes from database:', err.stack);
                     response = userLanguages[phoneNumber] === 'en' ? 
                         `END Error fetching votes. Please try again later.` : 
-                        `END HErreur lors de la récupération des votes. Veuillez réessayer plus tard.`;
+                        `END Erreur lors de la récupération des votes. Veuillez réessayer plus tard.`;
+                    res.send(response);
                 } else {
-                    response = userLanguages[phoneNumber] === 'en' ? 
-                        `END Votes:\n` : 
-                        `END Votes:\n`;
+                    response = userLanguages[phoneNumber] === 'en' ? `END Votes:\n` : `END Votes:\n`;
                     results.forEach(row => {
                         response += `${row.voted_candidate}: ${row.count} votes\n`;
                     });
@@ -105,15 +109,15 @@ app.post('/ussd', (req, res) => {
                             console.error('Error inserting data into database:', err.stack);
                         }
                     });
+
+                    res.send(response);
                 }
-                res.send(response);
             });
-            return; // Return here to avoid sending the response twice
         }
     } else if (userInput.length === 4) {
         // Fourth level menu: Voting confirmation
         let candidateIndex = parseInt(userInput[3]) - 1;
-        let candidateNames = ["Fabrice BYIRINGIRO  ", "Fabien ", "Benitha ", "Johnathan ", "Moise "];
+        let candidateNames = ["Fabrice BYIRINGIRO", "Fabien", "Benitha", "Johnathan", "Moise"];
         if (candidateIndex >= 0 && candidateIndex < candidateNames.length) {
             voters.add(phoneNumber); // Mark this phone number as having voted
             response = userLanguages[phoneNumber] === 'en' ? 
@@ -133,19 +137,16 @@ app.post('/ussd', (req, res) => {
             db.query(query, voteData, (err, result) => {
                 if (err) {
                     console.error('Error inserting data into database:', err.stack);
-                } else {
-                    // Increment the in-memory vote count
-                    votes[candidateNames[candidateIndex]] += 1;
                 }
             });
+            res.send(response);
         } else {
             response = userLanguages[phoneNumber] === 'en' ? 
                 `END Invalid selection. Please try again.` : 
-                `END USelection invalide. Veuillez réessayer.`;
+                `END Sélection invalide. Veuillez réessayer.`;
+            res.send(response);
         }
     }
-
-    res.send(response);
 });
 
 app.listen(PORT, () => {
