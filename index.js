@@ -50,15 +50,15 @@ app.post('/ussd', (req, res) => {
     // Determine next action based on user input
     if (userInput.length === 1 && userInput[0] === '') {
         // First level menu: Language selection
-        response = `CON Welcome to ildephonse voting booth\n`;
+        response = `CON Welcome to Guild president voting campain\n`;
         response += `1. English\n`;
-        response += `2. kinyarwanda`;
+        response += `2. French`;
     } else if (userInput.length === 1 && userInput[0] !== '') {
         // Save user's language choice and move to the name input menu
-        userLanguages[phoneNumber] = userInput[0] === '1' ? 'en' : 'sw';
+        userLanguages[phoneNumber] = userInput[0] === '1' ? 'en' : 'Fr';
         response = userLanguages[phoneNumber] === 'en' ? 
             `CON Please enter your name:` : 
-            `CON andika izina ryawe:`;
+            `CON S'il vous plaît entrez votre nom:`;
     } else if (userInput.length === 2) {
         // Save user's name
         userNames[phoneNumber] = userInput[1];
@@ -66,24 +66,24 @@ app.post('/ussd', (req, res) => {
         // Third level menu: Main menu
         response = userLanguages[phoneNumber] === 'en' ? 
             `CON Hi ${userNames[phoneNumber]}, choose an option:\n1. Vote Candidate\n2. View Votes` : 
-            `CON Amakuru ${userNames[phoneNumber]}, hitamo:\n1. umukandida\n2. reba abakandida`;
+            `CON Amakuru ${userNames[phoneNumber]}, choisis une option:\n1. Voter candidat\n2. Afficher les votes`;
     } else if (userInput.length === 3) {
         if (userInput[2] === '1') {
             // Check if the phone number has already voted
             if (voters.has(phoneNumber)) {
                 response = userLanguages[phoneNumber] === 'en' ? 
                     `END You have already voted. Thank you!` : 
-                    `END watoye. urakoze!`;
+                    `END Vous avez déjà voté. Merci!`;
             } else {
                 // Voting option selected
                 response = userLanguages[phoneNumber] === 'en' ? 
                     `CON Select a candidate:\n1. BYIRINGIRO Fabrice\n2. Fabien\n3. Benitha\n4. Johnathan\n5. Moise` : 
-                    `CON hitamo umukandida:\n1. BYIRINGIRO Fabrice\n2. Fabien \n3. Benitha\n4. Johnathan\n5. Moise` ;}
+                    `CON Sélectionnez un candidat:\n1. BYIRINGIRO Fabrice\n2. Fabien \n3. Benitha\n4. Johnathan\n5. Moise` ;}
         } else if (userInput[2] === '2') {
             // View votes option selected
             response = userLanguages[phoneNumber] === 'en' ? 
                 `END Votes:\n` : 
-                `END tora:\n`;
+                `END Votes:\n`;
             for (let candidate in votes) {
                 response += `${candidate}: ${votes[candidate]} votes\n`;
             }
@@ -97,7 +97,7 @@ app.post('/ussd', (req, res) => {
             voters.add(phoneNumber); // Mark this phone number as having voted
             response = userLanguages[phoneNumber] === 'en' ? 
                 `END Thank you for voting for ${candidateNames[candidateIndex]}!` : 
-                `END urakoze gutora ${candidateNames[candidateIndex]}!`;
+                `END Merci d'avoir voté pour ${candidateNames[candidateIndex]}!`;
 
             // Insert voting record into the database
             const voteData = {
@@ -117,7 +117,7 @@ app.post('/ussd', (req, res) => {
         } else {
             response = userLanguages[phoneNumber] === 'en' ? 
                 `END Invalid selection. Please try again.` : 
-                `END uhisemo ibitaribyo. ongera ugerageze.`;
+                `END Selection invalide. Veuillez réessayer.`;
         }
     }
 
