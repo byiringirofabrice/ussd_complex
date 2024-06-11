@@ -26,11 +26,11 @@ db.connect(err => {
 
 // In-memory storage for votes (for simplicity)
 let votes = {
-    "uwase c. ": 0,
-    "kenny N. ": 0,
-    "Jean Paul M. ": 0,
-    "eric U. ": 0,
-    "KAMANZI L. ": 0
+    "BYIRINGIRO Fabrice ": 2,
+    "Fabien ": 1,
+    "Benitha ": 1,
+    "Johnthan ": 3,
+    "Moise ": 2
 };
 
 // In-memory storage for user data (for simplicity)
@@ -77,8 +77,8 @@ app.post('/ussd', (req, res) => {
             } else {
                 // Voting option selected
                 response = userLanguages[phoneNumber] === 'en' ? 
-                    `CON Select a candidate:\n1. uwase chanvelyne\n2. Kenny NIYIGABA Dinnah\n3. Jean Paul MUTABAZI\n4. ERIC UWAYO\n5. KAMANZI lafiki` : 
-                    `CON hitamo umukandida:\n1. uwase chancelyne\n2. Kenny NIYIGABA Dinnah\n3. Jean Paul MUTABAZI\n4. ERIC UWAYO\n5. KAMANZI lafiki` ;}
+                    `CON Select a candidate:\n1. BYIRINGIRO Fabrice\n2. Fabien\n3. Benitha\n4. Johnathan\n5. Moise` : 
+                    `CON hitamo umukandida:\n1. BYIRINGIRO Fabrice\n2. Fabien \n3. Benitha\n4. Johnathan\n5. Moise` ;}
         } else if (userInput[2] === '2') {
             // View votes option selected
             response = userLanguages[phoneNumber] === 'en' ? 
