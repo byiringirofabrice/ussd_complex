@@ -3,16 +3,16 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3306;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // Create a connection to the MySQL database
 const db = mysql.createConnection({
-    host: 'use a hosted db',
-    user: 'use a hosted db',
-    password: 'use a hosted db', // Replace with your MySQL password
-    database: 'use a hosted db'
+    host: 'bc8ha5yxbt3tz4602aw0-mysql.services.clever-cloud.com',
+    user: 'ugfuuybkavzrt6h5',
+    password: 'z89Qx9n2YTyGkAzLh1l8', // Replace with your MySQL password
+    database: 'bbc8ha5yxbt3tz4602aw0'
 });
 
 // Connect to the database
@@ -43,13 +43,13 @@ app.post('/ussd', (req, res) => {
         // First level menu: Language selection
         response = `CON Welcome to Guild voting booth\n`;
         response += `1. English\n`;
-        response += `2. Swahili`;
+        response += `2. French`;
     } else if (userInput.length === 1 && userInput[0] !== '') {
         // Save user's language choice and move to the name input menu
-        userLanguages[phoneNumber] = userInput[0] === '1' ? 'en' : 'sw';
+        userLanguages[phoneNumber] = userInput[0] === '1' ? 'en' : 'fr';
         response = userLanguages[phoneNumber] === 'en' ? 
             `CON Please enter your name:` : 
-            `CON Tafadhali ingiza jina lako:`;
+            `CON TS'il vous plaît entrez votre nom:`;
     } else if (userInput.length === 2) {
         // Save user's name
         userNames[phoneNumber] = userInput[1];
@@ -57,19 +57,19 @@ app.post('/ussd', (req, res) => {
         // Third level menu: Main menu
         response = userLanguages[phoneNumber] === 'en' ? 
             `CON Hi ${userNames[phoneNumber]}, choose an option:\n1. Vote Candidate\n2. View Votes` : 
-            `CON Habari ${userNames[phoneNumber]}, chagua chaguo:\n1. Piga kura\n2. Tazama kura`;
+            `CON Salut ${userNames[phoneNumber]}, choisis une option:\n1. Voter candidat\n2. Afficher les votes`;
     } else if (userInput.length === 3) {
         if (userInput[2] === '1') {
             // Check if the phone number has already voted
             if (voters.has(phoneNumber)) {
                 response = userLanguages[phoneNumber] === 'en' ? 
                     `END You have already voted. Thank you!` : 
-                    `END Tayari umeshapiga kura. Asante!`;
+                    `END Vous avez déjà voté. Merci!`;
             } else {
                 // Voting option selected
                 response = userLanguages[phoneNumber] === 'en' ? 
-                    `CON Select a candidate:\n1. Jeremy MURENZI\n2. Lynn GIHOZO\n3. Claude KABAKA\n4. Jasmin IRABIZI\n5. Vyn NTWARI` : 
-                    `CON Chagua mgombea:\n1. Jeremy MURENZI\n2. Lynn GIHOZO\n3. Claude KABAKA\n4. Jasmin IRABIZI\n5. Vyn NTWARI`;
+                    `CON Select a candidate:\n1. Fabrice BYIRINGIRO\n2. Fabien\n3. Benitha\n4. Johnathan\n5. Moise` : 
+                    `CON Sélectionnez un candidat:\n1. Fabrice BYIRINGIRO\n2. Fabien \n3. Benitha\n4. Johnathan\n5. Moise`;
             }
         } else if (userInput[2] === '2') {
             // View votes option selected
@@ -81,11 +81,11 @@ app.post('/ussd', (req, res) => {
                     console.error('Error fetching votes from database:', err.stack);
                     response = userLanguages[phoneNumber] === 'en' ? 
                         `END Error fetching votes. Please try again later.` : 
-                        `END Hitilafu katika kupata kura. Tafadhali jaribu tena baadaye.`;
+                        `END HErreur lors de la récupération des votes. Veuillez réessayer plus tard.`;
                 } else {
                     response = userLanguages[phoneNumber] === 'en' ? 
                         `END Votes:\n` : 
-                        `END Kura:\n`;
+                        `END Votes:\n`;
                     results.forEach(row => {
                         response += `${row.voted_candidate}: ${row.count} votes\n`;
                     });
@@ -113,12 +113,12 @@ app.post('/ussd', (req, res) => {
     } else if (userInput.length === 4) {
         // Fourth level menu: Voting confirmation
         let candidateIndex = parseInt(userInput[3]) - 1;
-        let candidateNames = ["Jeremy MURENZI  ", "Lynn GIHOZO ", "Claude KABAKA ", "Jasmin IRABIZI ", "Vyn NTWARI "];
+        let candidateNames = ["Fabrice BYIRINGIRO  ", "Fabien ", "Benitha ", "Johnathan ", "Moise "];
         if (candidateIndex >= 0 && candidateIndex < candidateNames.length) {
             voters.add(phoneNumber); // Mark this phone number as having voted
             response = userLanguages[phoneNumber] === 'en' ? 
                 `END Thank you for voting for ${candidateNames[candidateIndex]}!` : 
-                `END Asante kwa kumpigia kura ${candidateNames[candidateIndex]}!`;
+                `END Merci d'avoir voté pour ${candidateNames[candidateIndex]}!`;
 
             // Insert voting record into the database
             const voteData = {
@@ -141,7 +141,7 @@ app.post('/ussd', (req, res) => {
         } else {
             response = userLanguages[phoneNumber] === 'en' ? 
                 `END Invalid selection. Please try again.` : 
-                `END Uchaguzi batili. Tafadhali jaribu tena.`;
+                `END USelection invalide. Veuillez réessayer.`;
         }
     }
 
